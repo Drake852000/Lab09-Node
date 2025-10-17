@@ -58,7 +58,7 @@ const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, "frontend", "build")));
 
 // Cualquier ruta que no sea API responderá con el index.html del frontend
-app.get("*", (req, res) => {
+app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "frontend", "build", "index.html"));
 });
 
