@@ -1,39 +1,33 @@
 // server.js
 
-// Importa Express para crear la aplicación web
+// ===============================
+// 📦 Importaciones
+// ===============================
 import express from "express";
-
-// Importa CORS para permitir solicitudes desde otros dominios (por ejemplo, desde el frontend)
 import cors from "cors";
-
-// Importa los modelos y configuración de Sequelize (ORM para la base de datos)
-import db from "./app/models/index.js";
-
-// Importa las rutas de autenticación (signup, signIn)
-import authRoutes from "./app/routes/auth.routes.js";
-
-// Importa las rutas protegidas por roles de usuario
-import userRoutes from "./app/routes/user.routes.js";
-
-// Módulos adicionales para servir el frontend
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Configura Express
+import db from "./app/models/index.js";
+import authRoutes from "./app/routes/auth.routes.js";
+import userRoutes from "./app/routes/user.routes.js";
+
+// ===============================
+// ⚙️ Configuración base
+// ===============================
 const app = express();
 
-// Configuración de CORS (usa solo para desarrollo local)
 const corsOptions = {
-  origin: "http://localhost:3001",
+  origin: "http://localhost:3001", // solo para desarrollo local
   credentials: true,
 };
 app.use(cors(corsOptions));
-
-// Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rutas del backend
+// ===============================
+// 🧩 Rutas del backend
+// ===============================
 app.get("/api", (req, res) => {
   res.json({ message: "Welcome to the Node.js JWT Authentication API." });
 });
@@ -41,29 +35,30 @@ app.get("/api", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/test", userRoutes);
 
-// Sincroniza la base de datos
-db.sequelize.sync({ force: false }).then(() => {
-  console.log("Database synchronized");
-});
+// ===============================
+// 🗄️ Base de datos
+// ===============================
+db.sequelize
+  .sync({ force: false })
+  .then(() => console.log("✅ Database synchronized"))
+  .catch((err) => console.error("❌ Error syncing database:", err));
 
 // ===============================
-// 🧩 CONFIGURAR FRONTEND (React)
+// 🌐 Servir frontend (React)
 // ===============================
-
-// Variables necesarias para rutas
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Servir archivos estáticos del frontend (React build)
+// Servir archivos estáticos del build de React
 app.use(express.static(path.join(__dirname, "frontend", "build")));
 
-// Cualquier ruta que no sea API responderá con el index.html del frontend
+// Cualquier ruta no manejada por el backend devuelve index.html
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "frontend", "build", "index.html"));
 });
 
 // ===============================
-// 🚀 Iniciar el servidor
+// 🚀 Iniciar servidor
 // ===============================
 const PORT = process.env.PORT || 3000;
 
